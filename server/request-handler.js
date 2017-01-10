@@ -10,7 +10,69 @@ this file and include it in basic-server.js so that it actually works.
 
 *Hint* Check out the node module documentation at http://nodejs.org/api/modules.html.
 
-**************************************************************/
+**************************************************************/ 
+// all properties in request:
+// key:  _readableState , value: undefined
+// key:  readable , value: undefined
+// key:  domain , value: undefined
+// key:  _events , value: undefined
+// key:  _eventsCount , value: undefined
+// key:  _maxListeners , value: undefined
+// key:  socket , value: undefined
+// key:  connection , value: undefined
+// key:  httpVersionMajor , value: undefined
+// key:  httpVersionMinor , value: undefined
+// key:  httpVersion , value: undefined
+// key:  complete , value: undefined
+// key:  headers , value: undefined
+// key:  rawHeaders , value: undefined
+// key:  trailers , value: undefined
+// key:  rawTrailers , value: undefined
+// key:  upgrade , value: undefined
+// key:  url , value: undefined
+// key:  method , value: undefined
+// key:  statusCode , value: undefined
+// key:  statusMessage , value: undefined
+// key:  client , value: undefined
+// key:  _consuming , value: undefined
+// key:  _dumped , value: undefined
+// key:  setTimeout , value: undefined
+// key:  read , value: undefined
+// key:  _read , value: undefined
+// key:  destroy , value: undefined
+// key:  _addHeaderLines , value: undefined
+// key:  _addHeaderLine , value: undefined
+// key:  _dump , value: undefined
+// key:  push , value: undefined
+// key:  unshift , value: undefined
+// key:  isPaused , value: undefined
+// key:  setEncoding , value: undefined
+// key:  pipe , value: undefined
+// key:  unpipe , value: undefined
+// key:  on , value: undefined
+// key:  addListener , value: undefined
+// key:  resume , value: undefined
+// key:  pause , value: undefined
+// key:  wrap , value: undefined
+// key:  setMaxListeners , value: undefined
+// key:  getMaxListeners , value: undefined
+// key:  emit , value: undefined
+// key:  prependListener , value: undefined
+// key:  once , value: undefined
+// key:  prependOnceListener , value: undefined
+// key:  removeListener , value: undefined
+// key:  removeAllListeners , value: undefined
+// key:  listeners , value: undefined
+// key:  listenerCount , value: undefined
+// key:  eventNames , value: undefined
+
+var port = 3000;
+var ip = '127.0.0.1';
+// var urlPre = ''.concat(ip, ':', port);
+var serverUrl = 'http://127.0.0.1:3000/classes/messages';
+// the data stored in the server
+var data = {
+};
 
 var requestHandler = function(request, response) {
   // Request and Response come from node's http module.
@@ -27,13 +89,26 @@ var requestHandler = function(request, response) {
   // Adding more logging to your server can be an easy way to get passive
   // debugging help, but you should always be careful about leaving stray
   // console.logs in your code.
-  console.log('Serving request type ' + request.method + ' for url ' + request.url);
 
+
+  var headers = defaultCorsHeaders;
+  var method = request.method;
+  var url = ''.concat('http://', ip, ':', port, request.url);
+  console.log('url:', url);
+  var results = [];
   // The outgoing status.
   var statusCode = 200;
 
+  // on GET method, need to check the statusCode
+  if (method === 'GET') {
+    if (url !== serverUrl) {
+      statusCode = 404;
+    }
+  } else if (method === 'POST') {
+    statusCode = 201;
+  }
+
   // See the note below about CORS headers.
-  var headers = defaultCorsHeaders;
 
   // Tell the client we are sending them plain text.
   //
@@ -44,15 +119,22 @@ var requestHandler = function(request, response) {
   // .writeHead() writes to the request line and headers of the response,
   // which includes the status and all headers.
   response.writeHead(statusCode, headers);
-
   // Make sure to always call response.end() - Node may not send
   // anything back to the client until you do. The string you pass to
   // response.end() will be the body of the response - i.e. what shows
   // up in the browser.
   //
+  var body = {
+    headers: headers,
+    method: method,
+    url: url,
+    results: results,
+  };
+  console.log('body: ', body);
+
   // Calling .end "flushes" the response's internal buffer, forcing
   // node to actually send all the data over to the client.
-  response.end('Hello, World!');
+  response.end(JSON.stringify(body));
 };
 
 // These headers will allow Cross-Origin Resource Sharing (CORS).
@@ -71,3 +153,4 @@ var defaultCorsHeaders = {
   'access-control-max-age': 10 // Seconds.
 };
 
+exports.requestHandler = requestHandler;

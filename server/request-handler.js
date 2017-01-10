@@ -57,8 +57,8 @@ var requestHandler = function(request, response) {
     response.writeHead(404, {'Content-type': 'text/plain'});
     response.end();
   } else if (method === 'GET') {
-      response.writeHead(200, {'Content-type': 'text/plain'});
-      response.end(JSON.stringify(result));
+    response.writeHead(200, {'Content-type': 'text/plain'});
+    response.end(JSON.stringify(result));
   } else if (method === 'POST') {
     if (url === serverUrl) {    
       var requestBody = '';

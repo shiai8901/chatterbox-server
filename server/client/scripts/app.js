@@ -18,7 +18,7 @@ app.send = function(message, success, dataType) {
 
   $.ajax({
       // This is the url you should use to communicate with the parse API server.
-    url: 'http://127.0.0.1:3000',
+    url: 'https://api.parse.com/1/classes/messages',
     type: 'POST',
     data: JSON.stringify(message),
     contentType: 'application/json',
@@ -35,9 +35,9 @@ app.send = function(message, success, dataType) {
 app.fetch = (url, data, success, dataType) => {
   $.ajax({
     url: url,
-    // data: {
-    //   order: '-createdAt'
-    // },
+    data: {
+      order: '-createdAt'
+    },
     success: success,
     dataType: dataType,
   });
@@ -72,7 +72,7 @@ app.renderRoom = function(roomname) {
       if (app.currentRoom !== a) {
         clearInterval(undefinedInterval);
       }
-      app.fetch('http://127.0.0.1:3000/classes/messages', {
+      app.fetch('https://api.parse.com/1/classes/messages', {
 
       }, function(result) {
         app.clearMessages();
@@ -91,7 +91,7 @@ app.renderRoom = function(roomname) {
       if (app.currentRoom !== a) {
         clearInterval(definedInterval);
       }
-      app.fetch('http://127.0.0.1:3000/classes/messages', {
+      app.fetch('https://api.parse.com/1/classes/messages', {
       }, function(result) {
         app.clearMessages();
         for (var i = 0; i < result.results.length; i++) {

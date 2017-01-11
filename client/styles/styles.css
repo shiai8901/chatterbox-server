@@ -72,16 +72,6 @@ form input[type=text] {
 .chat:hover {
     background-color: #ddd;
 }
-/*
-.chat .roomname {
-    color: #333;
-    font-size: 12px;
-    float: right;
-}
-
-.chat p {
-    clear:both;
-}*/
 
 .spinner {
     float: right;

@@ -10,117 +10,66 @@ this file and include it in basic-server.js so that it actually works.
 
 *Hint* Check out the node module documentation at http://nodejs.org/api/modules.html.
 
-**************************************************************/ 
+**************************************************************/
+var urlParser = require('url');
 
-var defaultCorsHeaders = {
+var headers = {
   'access-control-allow-origin': '*',
   'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
   'access-control-allow-headers': 'content-type, accept',
-  'access-control-max-age': 10 // Seconds.
+  'access-control-max-age': 10, // Seconds.
+  'Content-Type': 'application/json'
 };
 
-var fs = require('fs');
+var data = {
+  results: [],
+};
 
-var port = 3000;
-var ip = '127.0.0.1';
-var serverUrl = 'http://127.0.0.1:3000/classes/messages';
-var data = [];
-
-// var requestHandler = function(request, response) {
-
-//   var headers = request.headers;
-//   var method = request.method;
-//   var url = ''.concat('http://', ip, ':', port, request.url, 'classes/messages');
-//   var results = [];
-
-//   var result = {
-//     headers: headers,
-//     method: method,
-//     url: url,
-//     results: data,
-//   };
-
-//   if (url !== serverUrl) {
-//     response.writeHead(404, {'Content-type': 'application/json'});
-//     response.end();
-//   } else if (method === 'GET') {   
-//     response.writeHead(200, {'Content-type': 'application/json'});
-//     response.end(JSON.stringify(result));
-//   } else if (method === 'POST') {
-//     var requestBody = '';
-//     request.on('error', function(err) {
-//       console.error(err);
-//     });
-//     request.on('data', function(data) {
-//       response.writeHead(201, {'Content-Type': 'application/json'});
-//       requestBody += data;
-//       response.end();        
-//     });
-//     request.on('end', function() {
-//       var message = JSON.parse(requestBody);
-//       data.push(message); 
-//       response.writeHead(201, {'Content-Type': 'application/json'});
-//       response.end();
-//     });
-//   } else if (method === 'OPTIONS') {
-//     result.headers = defaultCorsHeaders;
-//   }
-
-// };
 var requestHandler = function(request, response) {
 
-  var headers = request.headers;
+  var url = urlParser.parse(request.url).pathname;
+  if (url.charAt(url.length - 1) === '/') {
+    url = url.substring(0, url.length - 1);
+  }
+  console.log('url.pathname: ', url);
   var method = request.method;
-  var url = ''.concat('http://', ip, ':', port, request.url, 'classes/messages');
-  var results = [];
 
-  var result = {
-    headers: headers,
-    method: method,
-    url: url,
-    results: data,
-  };
-  console.log('request url: ', request.url);
-  console.log('url: ', url);
-  console.log('serverUrl: ', serverUrl);
-  var writeStrem = fs.createWriteStream('./output');
-  if (url !== serverUrl) {
-    console.log('Got ya!');
-    response.writeHead(404, {'Content-type': 'application/json'});
+  console.log('Serving request type ' + request.method + ' for url ' + request.url);
+
+  if (url !== '/classes/messages') {
+    headers['url'] = url;
+    response.writeHead(404, headers);
     response.end();
-  } else if (method === 'GET') {   
-    response.writeHead(200, {'Content-type': 'application/json'});
-    response.end(JSON.stringify(result));
-  } else if (method === 'POST') {
-    var requestBody = '';
-    request.on('error', function(err) {
-      console.error(err);
-    });
-    request.on('data', function(data) {
-      response.writeHead(201, {'Content-Type': 'application/json'});
-      requestBody += data;
-      response.end();        
-    });
-    request.on('end', function() {
-      var message = JSON.parse(requestBody);
-      console.log(message);
-      data.push(message); 
-      response.writeHead(201, {'Content-Type': 'application/json'});
+  } else {
+    if (request.method === 'GET') {
+        response.writeHead(200, headers);
+        response.end(JSON.stringify(data));
+    } else if (request.method === 'POST') {
+        var message = '';
+        request.on('error', function(err) {
+          console.log('Error to get messages from /classes/messages');
+        });
+        request.on('data', function(chunk) {
+          message += chunk; // body is already a string
+        });
+        request.on('end', function() {
+          data.results.push(JSON.parse(message)); // need the message to be an object
+        });
+        // console.log('data.results , after push: ', data.results);
+        response.writeHead(201, headers);
+        response.end();      
+    } else if (request.method === 'OPTIONS') {
+      console.log('OPTIONS');
+      response.writeHead(200, headers);
       response.end();
-    });
-  } else if (method === 'OPTIONS') {
-    result.headers = defaultCorsHeaders;
+    }
   }
 
 };
-// These headers will allow Cross-Origin Resource Sharing (CORS).
-// This code allows this server to talk to websites that
-// are on different domains, for instance, your chat client.
-//
+
+
 // Your chat client is running from a url like file://your/chat/client/index.html,
 // which is considered a different domain.
-//
-// Another way to get around this restriction is to serve you chat
-// client from this domain by setting up static file serving.
 
 exports.requestHandler = requestHandler;
+

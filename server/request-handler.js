@@ -42,22 +42,22 @@ var requestHandler = function(request, response) {
     response.end();
   } else {
     if (request.method === 'GET') {
-        response.writeHead(200, headers);
-        response.end(JSON.stringify(data));
+      response.writeHead(200, headers);
+      response.end(JSON.stringify(data));
     } else if (request.method === 'POST') {
-        var message = '';
-        request.on('error', function(err) {
-          console.log('Error to get messages from /classes/messages');
-        });
-        request.on('data', function(chunk) {
-          message += chunk; // body is already a string
-        });
-        request.on('end', function() {
-          data.results.push(JSON.parse(message)); // need the message to be an object
-        });
+      var message = '';
+      request.on('error', function(err) {
+        console.log('Error to get messages from /classes/messages');
+      });
+      request.on('data', function(chunk) {
+        message += chunk; // body is already a string
+      });
+      request.on('end', function() {
+        data.results.push(JSON.parse(message)); // need the message to be an object
+      });
         // console.log('data.results , after push: ', data.results);
-        response.writeHead(201, headers);
-        response.end();      
+      response.writeHead(201, headers);
+      response.end();      
     } else if (request.method === 'OPTIONS') {
       console.log('OPTIONS');
       response.writeHead(200, headers);
